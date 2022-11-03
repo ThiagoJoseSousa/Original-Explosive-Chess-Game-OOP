@@ -142,6 +142,7 @@ main {
 }
 main h1{
     margin-bottom: 30px;
+    text-align: center;
 }
 #buttons {
 
@@ -163,12 +164,11 @@ main li {
 .game-button {
     color:white;
     font-size: 1.5rem;
-}
-.game-button {
     background-color: white;
     display: flex;
     justify-content: space-evenly;
     align-items: center;
+    transition: all 0.5s;
 }
 
 #buttons :nth-child(2) {
@@ -200,7 +200,6 @@ main li {
 
 #buttons .game-button:hover{
     cursor: pointer;
-
     -webkit-box-shadow: 10px 10px 15px 0px rgba(0, 0, 0, 0.75);
     -moz-box-shadow: 10px 10px 15px 0px rgba(0, 0, 0, 0.75);
     box-shadow: 10px 10px 15px 0px rgba(0, 0, 0, 0.75);
@@ -212,4 +211,12 @@ main li {
 
 ul {
     font-size: 1.5rem;
+}
+
+.notcurrent {
+    display:none;
+}
+
+nav img{
+    pointer-events: none
 }

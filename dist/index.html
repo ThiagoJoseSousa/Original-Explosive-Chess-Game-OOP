@@ -9,15 +9,14 @@
     <title>Explosive Chess Game</title>
 </head>
 <body>
-    <section>
 
         <header>
             <nav class="nav-bar">
-                <a href="" id="logo"><img src="../public/images/logo.png" alt="" srcset="">Explosive Chess Game</a>
+                <div id="logo"><img src="../public/images/logo.png" alt="logo">Explosive Chess Game</div>
                 <ul class="nav-list">
-                    <li class="nav-item"><img src="../public/images/robot.png" alt="Robot">Player vs AI</li>
-                    <li class="nav-item"><img src="../public/images/human.png" alt="Human">Multiplayer</li>
-                    <li class="nav-item"><img src="../public/images/home.png" alt="Home" >Home</li>
+                    <li class="nav-item" data-page="2"><img src="../public/images/robot.png" alt="Robot">Player vs AI</li>
+                    <li class="nav-item" data-page="1"><img src="../public/images/human.png" alt="Human">Multiplayer</li>
+                    <li class="nav-item" data-page="0"><img src="../public/images/home.png" alt="Home" >Home</li>
                 </ul>
                 <div class="hamburguer">
                     <span class="bar"></span>
@@ -27,25 +26,32 @@
             </nav>
         </header>
         <main>
-            <h1>Explosive Chess, the new chess variant!</h1>
-            <ul>Differences from original chess: 
-                <li> You can <b>decide</b> in an UI between doing a normal attack or to explode your piece when attacking! 
-                </li>
-                <li>
-                Moves aren't forbidden here, the king can explode himself! (And with enemy king!).</ul>
-                </li>
-            <div id="gamecard">
-                <img src="../public/images/logo.png" alt="logo"> </img>
-                <div id="buttons">
-                    <button class="game-button" type="button"><img src="../public/images/robot.png">Single Player</button>
-                    <button class="game-button" type="button"><img src="../public/images/human.png">Multiplayer</button>
-                </div>
-            </div>
-        </main>
-        <footer>
+            <section id="page-1">
+
+                <h1>Explosive Chess, the new chess variant!</h1>
+                <ul>Differences from original chess: 
+                    <li> You can <b>decide</b> in an UI between doing a normal attack or to explode your piece when attacking! 
+                    </li>
+                    <li>
+                        Moves aren't forbidden here, the king can explode himself! (And with enemy king!).</ul>
+                    </li>
+                    <div id="gamecard">
+                        <img src="../public/images/logo.png" alt="logo"> </img>
+                        <div id="buttons">
+                            <button class="game-button nav-item" type="button" data-page="2"><img src="../public/images/robot.png" alt="robot icon">Single Player</button>
+                            <button class="game-button nav-item" type="button" data-page="1"><img src="../public/images/human.png" alt="human">Multiplayer</button>
+                        </div>
+                    </div>
+                </section>
+                <section id="page-2" class="notcurrent">
+
+                </section>
+                <section id="page-3" class="notcurrent"> 
+                </section>
+                </main>
+                <footer>
 
         </footer>
-    </section>
 </body>
 <script src="../src/page/page.js"></script>
 </html>
