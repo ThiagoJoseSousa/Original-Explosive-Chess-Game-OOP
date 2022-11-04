@@ -1,4 +1,4 @@
-export default function gameController (){
+function gameController (){
 
     class Gameboard {
         constructor (){
@@ -12,14 +12,26 @@ export default function gameController (){
             }
             render() {
                 let table=document.getElementById("board")
+                let isGreen=false;
                 for (let x=0; x<8; x++) {
                     let tableRow=document.createElement("tr")
                     tableRow.setAttribute("class","tableRow")
                         for(let y=0;y<8; y++) {
                             let cell = document.createElement("td");
                             cell.setAttribute(`data-coords`, `${x}${y}`);
+                            cell.classList.add('board-square')
+                            //changing color
+                            if (!isGreen) {
+                                cell.classList.add('white')
+                                isGreen=true;
+                            } else {
+                                cell.classList.add('green')
+                                isGreen=false;
+                            }
+                            //toggling colors
                             tableRow.appendChild(cell);
-                    }
+                        }
+                    isGreen= !isGreen;
                     table.appendChild(tableRow);
                 }
             }
@@ -87,3 +99,5 @@ export default function gameController (){
     
         return {Gameboard}
     }
+
+export default gameController;

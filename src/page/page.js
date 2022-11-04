@@ -1,4 +1,4 @@
-import gameController from "../chess/gameController";
+import gameController from "../chess/gameController.js"
 
 // IIFE for hamburguer layout
 (function (){
@@ -45,6 +45,8 @@ function startGame(e) {
     chooseSide.classList.add('hidden');
     console.log(e.target.id.slice(0,5) + ' is human')
     
-    let board=new gameController.Gameboard();
+    let game= gameController()
+    let gameboard= new game.Gameboard()
+    gameboard.render()
 }
 }())
