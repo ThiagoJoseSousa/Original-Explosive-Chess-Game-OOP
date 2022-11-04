@@ -1,3 +1,5 @@
+import gameController from "../chess/gameController";
+
 // IIFE for hamburguer layout
 (function (){
 const hamburguer = document.querySelector(".hamburguer");
@@ -26,3 +28,23 @@ hamburguer.addEventListener("click", ()=>{
     }
 }());
 
+// should above be an object for reuse?
+// I don't think so, It loads just one time + just by creating a new section/button It'll be rendered. 
+//It's up for extension if someone creates a func
+
+//button to decide which side you'll play on single player
+(function (){
+    const whiteStart=document.getElementById('white-start')
+    const blackStart=document.getElementById('black-start')
+    const chooseSide=document.getElementById('chooseSide')
+
+whiteStart.addEventListener('click', startGame)
+blackStart.addEventListener('click', startGame)
+
+function startGame(e) {
+    chooseSide.classList.add('hidden');
+    console.log(e.target.id.slice(0,5) + ' is human')
+    
+    let board=new gameController.Gameboard();
+}
+}())

@@ -213,10 +213,39 @@ ul {
     font-size: 1.5rem;
 }
 
+
 .notcurrent {
     display:none;
 }
-
 nav img{
     pointer-events: none
+}
+
+#page-3 {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+#page-3 button {
+    height: 100px;
+    width:40vw;
+    font-size:3vw;
+    margin: 10px;
+    transition: all 0.3s;
+}
+
+#page-3 button:hover{
+transition: all 0.3s;
+background-color: white;
+transform: scale(1.2);
+cursor: pointer;
+}
+
+#page-3.notcurrent {
+    display: none;
+}
+
+.hidden {
+    display:none;
 }
