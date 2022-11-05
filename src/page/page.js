@@ -47,7 +47,6 @@ function startGame(e) {
     
     let game= gameController()
     let gameboard= new game.Gameboard()
-    gameboard.render()
     let knight = new game.Knight('knight','white')
     console.log(knight.getPossibleMoves('33',gameboard.board),'knight')
     let king = new game.King('king','white')
@@ -62,6 +61,7 @@ function startGame(e) {
     let whitepawn =new game.Pawn('Pawn','white');
     whitepawn.enpasant=true;
     gameboard.board[4][3]=whitepawn;
+    gameboard.render()
     console.log(pawn.getPossibleMoves('33',gameboard.board),'pawn')
 }
 }())

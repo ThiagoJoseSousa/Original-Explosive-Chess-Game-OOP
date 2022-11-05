@@ -236,14 +236,21 @@ nav img{
     width:40vw;
     font-size:3vw;
     margin: 10px;
+    background-color: white;
+    border-radius: 10px;
     transition: all 0.3s;
+}
+button#black-start{
+    background-color: black;
+    color:white;
 }
 
 #page-3 button:hover{
 transition: all 0.3s;
-background-color: white;
-transform: scale(1.2);
 cursor: pointer;
+-webkit-box-shadow: 10px 10px 15px 0px rgb(0 0 0 / 75%);
+-moz-box-shadow: 10px 10px 15px 0px rgba(0, 0, 0, 0.75);
+box-shadow: 10px 10px 15px 0px rgb(0 0 0 / 75%);
 }
 
 #page-3.notcurrent {
@@ -278,4 +285,20 @@ td.board-square{
 
 .white {
     background: white;
+}
+
+.pieceImg {
+    width:60%;
+    height: 80%;
+    pointer-events: none;
+}
+
+.board-square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#chooseSide p {
+    text-align: center;
 }

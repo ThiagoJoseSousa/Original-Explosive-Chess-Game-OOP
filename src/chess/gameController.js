@@ -31,7 +31,13 @@ function gameController (){
                                 cell.classList.add('green')
                                 isGreen=false;
                             }
-                            //toggling colors
+                            //displaying piece image
+                            if (this.board[x][y]) {
+                                let img=document.createElement('img');
+                                img.setAttribute('src',this.board[x][y].image)
+                                img.classList.add('pieceImg')
+                                cell.appendChild(img)
+                            }
                             tableRow.appendChild(cell);
                         }
                     isGreen= !isGreen;
