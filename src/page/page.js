@@ -48,5 +48,11 @@ function startGame(e) {
     let game= gameController()
     let gameboard= new game.Gameboard()
     gameboard.render()
+    let knight = new game.Knight('knight','white')
+    console.log(knight.getPossibleMoves('33',gameboard.board))
+    let king = new game.King('king','white')
+    console.log(king.getPossibleMoves('33',gameboard.board))
+    let rook= new game.Rook('rook','white')
+    console.log(rook.getPossibleMoves('33',gameboard.board))
 }
 }())
