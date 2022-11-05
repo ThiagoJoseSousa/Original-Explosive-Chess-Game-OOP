@@ -49,12 +49,19 @@ function startGame(e) {
     let gameboard= new game.Gameboard()
     gameboard.render()
     let knight = new game.Knight('knight','white')
-    console.log(knight.getPossibleMoves('33',gameboard.board))
+    console.log(knight.getPossibleMoves('33',gameboard.board),'knight')
     let king = new game.King('king','white')
-    console.log(king.getPossibleMoves('33',gameboard.board))
+    console.log(king.getPossibleMoves('33',gameboard.board),'king')
     let rook= new game.Rook('rook','white')
-    console.log(rook.getPossibleMoves('33',gameboard.board))
+    console.log(rook.getPossibleMoves('33',gameboard.board),'rook')
     let bishop= new game.Bishop('bishop','white')
-    console.log(bishop.getPossibleMoves('33',gameboard.board))
+    console.log(bishop.getPossibleMoves('33',gameboard.board), 'bishop')
+    let queen= new game.Queen('Queen','white')
+    console.log(queen.getPossibleMoves('33',gameboard.board),'queen')
+    let pawn =new game.Pawn('Pawn','black')
+    let whitepawn =new game.Pawn('Pawn','white');
+    whitepawn.enpasant=true;
+    gameboard.board[4][3]=whitepawn;
+    console.log(pawn.getPossibleMoves('33',gameboard.board),'pawn')
 }
 }())

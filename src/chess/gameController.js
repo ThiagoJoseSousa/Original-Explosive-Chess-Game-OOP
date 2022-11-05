@@ -8,7 +8,7 @@ function gameController (){
             this.table=document.getElementById("board")
             }
 
-            clean(){
+            cleanDOM(){
                 while (this.table.firstChild) {
                     this.table.removeChild(this.table.firstChild);
                   }
@@ -158,7 +158,8 @@ function gameController (){
             constructor(type, color){
                 super (type,color) 
             }
-            getPossibleMoves (coords,board) {
+            //static to reuse It on Queen
+            static getPossibleMoves (coords,board) {
                 //must create 4 loops for each rook direction
 
                 let x = parseInt(coords[0], 10);
@@ -196,13 +197,18 @@ function gameController (){
                }
                  return possibilities
             }
+            // our instance also must have above func!
+            getPossibleMoves(coords,board) {
+                return Rook.getPossibleMoves(coords,board)
+            }
         }
 
         class Bishop extends Pieces{
             constructor(type,color){
                 super(type,color)
             }
-            getPossibleMoves(coords,board){
+            //static to reuse It on Queen
+            static getPossibleMoves(coords,board){
                 //same logic as rook
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
@@ -238,19 +244,66 @@ function gameController (){
                 }
                 return possibilities;
             }
+            // our instance also must have above func!
+            getPossibleMoves(coords,board){
+                return Bishop.getPossibleMoves(coords,board)
+            }
         }
         class Queen extends Pieces {
             constructor(type,color) {
                 super(type,color)
             }
-            getPossibleMoves() {
-                
+            getPossibleMoves(coords,board) {
+                let legalMoves=[]
+                Rook.getPossibleMoves(coords,board).forEach((item)=>{
+                    legalMoves.push(item)
+                })
+                Bishop.getPossibleMoves(coords,board).forEach((item)=>{
+                    legalMoves.push(item)
+                })
+                return legalMoves;
             }
         }
 
         class Pawn extends Pieces {
-            constructor() {
+            constructor(type,color) {
                 super(type,color)
+                this.start=true;
+            }
+            getPossibleMoves(coords,board){
+                let x = parseInt(coords[0], 10);
+                let y = parseInt(coords[1], 10);
+                let possibilities = {
+                    //first and second elements from arraylist have a extra element for special rules (en pasant and 2 square move)
+                    white: [[x+1,x-1,y+1],[x,y+2, y+1],[x,y+1],[x+1,y+1],[x-1,y+1]],
+                    black: [[x+1,x-1,y-1],[x,y-2, y-1],[x,y-1],[x+1,y-1],[x-1,y-1]]
+                };
+                return possibilities[this.color].reduce(
+                    (prev,curr,i)=> {
+                        //checking if inside board
+                        if (curr[0]>-1 && curr[0]<8 && curr[1]>-1 && curr[1]<8){
+                            //en pasant rule
+                            if (i===0 && board[curr[0]][y] && board[curr[0]][y].enpasant && board[curr[0]][y].color!==this.color){
+                                prev.push([curr[0],curr[2]])
+                            } else if (i===0 && board[curr[1]][y] && board[curr[1]][y].enpasant && board[curr[1]][y].color!==this.color){
+                                prev.push([curr[1],curr[2]])
+                            }
+                            //2 squares move
+                            if (i===1 && this.start && !board[curr[0]][curr[1]] && !board[curr[0]][curr[2]]){
+                                prev.push([curr[0],curr[1]])
+                            }
+                            //checking if can go straight
+                            if (i===2 && !board[curr[0]][curr[1]]){
+                                prev.push(curr)
+                             } 
+                             //checking if can attack
+                            if (board[curr[0]][curr[1]]!==undefined && board[curr[0]][curr[1]]!==this.color) {
+                                prev.push(curr)
+                            }
+                        }
+                        return prev
+                    },[]
+                )
             }
 
             promote (){
@@ -258,7 +311,7 @@ function gameController (){
             }
         }
     
-        return {Gameboard,Knight,King, Rook, Bishop}
+        return {Gameboard,Knight,King, Rook, Bishop, Queen,Pawn}
     }
 
 export default gameController;
