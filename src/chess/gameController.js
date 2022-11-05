@@ -84,6 +84,9 @@ function gameController (){
             getPossibleMoves(){
 
             }
+            move() {
+                
+            }
             explode(){
 
             }
@@ -156,6 +159,8 @@ function gameController (){
                 super (type,color) 
             }
             getPossibleMoves (coords,board) {
+                //must create 4 loops for each rook direction
+
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
                 let possibilities=[];
@@ -193,6 +198,56 @@ function gameController (){
             }
         }
 
+        class Bishop extends Pieces{
+            constructor(type,color){
+                super(type,color)
+            }
+            getPossibleMoves(coords,board){
+                //same logic as rook
+                let x = parseInt(coords[0], 10);
+                let y = parseInt(coords[1], 10);
+                let possibilities=[];
+                //up-right
+                for (let i=0; x+i<8 && y+i<8; i++) {
+                    board[x+i][y+i]!==undefined && board[x+i][y+i].color===this.color?i=8:possibilities.push([x+i, y+i])
+                    if (board[x+i][y+i]!==undefined && board[x+i][y+i].color!==this.color) {
+                        i=8;
+                    }
+                }
+                //down-right
+                for (let i=0; x+i<8 && y-i>-1; i++) {
+                    board[x+i][y-i]!==undefined && board[x+i][y-i].color===this.color?i=8:possibilities.push([x+i, y-i])
+                    if (board[x+i][y-i]!==undefined && board[x+i][y-i].color!==this.color) {
+                        i=8;
+                    }
+                }
+
+                //up-left
+                for (let i=0; x-i>-1 && y+i<8; i++) {
+                    board[x-i][y+i]!==undefined && board[x-i][y+i].color===this.color?i=8:possibilities.push([x-i, y+i])
+                    if (board[x-i][y+i]!==undefined && board[x-i][y+i].color!==this.color) {
+                        i=8;
+                    }
+                }
+                //down-left
+                for (let i=0; x-i>-1 && y-i>-1; i++) {
+                    board[x-i][y-i]!==undefined && board[x-i][y-i].color===this.color?i=8:possibilities.push([x-i, y-i])
+                    if (board[x-i][y-i]!==undefined && board[x-i][y-i].color!==this.color) {
+                        i=8;
+                    }
+                }
+                return possibilities;
+            }
+        }
+        class Queen extends Pieces {
+            constructor(type,color) {
+                super(type,color)
+            }
+            getPossibleMoves() {
+                
+            }
+        }
+
         class Pawn extends Pieces {
             constructor() {
                 super(type,color)
@@ -203,7 +258,7 @@ function gameController (){
             }
         }
     
-        return {Gameboard,Knight,King, Rook}
+        return {Gameboard,Knight,King, Rook, Bishop}
     }
 
 export default gameController;

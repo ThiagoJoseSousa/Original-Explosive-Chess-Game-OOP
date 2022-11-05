@@ -54,5 +54,7 @@ function startGame(e) {
     console.log(king.getPossibleMoves('33',gameboard.board))
     let rook= new game.Rook('rook','white')
     console.log(rook.getPossibleMoves('33',gameboard.board))
+    let bishop= new game.Bishop('bishop','white')
+    console.log(bishop.getPossibleMoves('33',gameboard.board))
 }
 }())
