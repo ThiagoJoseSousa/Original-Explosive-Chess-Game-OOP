@@ -267,12 +267,15 @@ table {
     border-spacing: 0;
     width: fit-content;
     height: fit-content;
+    display: flex;
+    flex-wrap: wrap;
+    
 }
 
 .tableRow {
     display:flex;
     justify-content: center;
-
+    flex-direction: column-reverse;
 }
 td.board-square{
     width:70px;

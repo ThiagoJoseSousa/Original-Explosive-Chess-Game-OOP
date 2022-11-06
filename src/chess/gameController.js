@@ -13,6 +13,41 @@ function gameController (){
                     this.table.removeChild(this.table.firstChild);
                   }
             }
+            start () {
+                let whitePlayer= new Players('white')
+                this.players.push(whitePlayer)
+                let blackPlayer= new Players('black')
+                this.players.push(blackPlayer)
+                //creating pieces for each player
+                this.players.forEach((player,i)=>{
+                    let y=i?6:1; // toggles y depending on which player to place pawn
+                    for (let i=0, x=0; i<8; i++){
+                        let pawn=player.createPiece(Pawn,'pawn')
+                        player.placePiece(pawn,x+i,y,this.board)
+                    }
+                    y= i?7:0; // toggles y value to place other pieces
+                    let king=player.createPiece(King,'king')
+                    player.placePiece(king,4,y,this.board)
+
+                    let queen=player.createPiece(Queen,'queen')
+                    player.placePiece(queen,3,y,this.board) 
+
+                    // left/right side of queen/king
+                    for (let x=0, i=0;i<2;i++, x=5){
+                        let bishop=player.createPiece(Bishop,'bishop');
+                        player.placePiece(bishop,x+2,y,this.board)
+                        
+                        let knight=player.createPiece(Knight,'knight');
+                        player.placePiece(knight,x+1,y,this.board) 
+                        
+                        let rook=player.createPiece(Rook,'rook');
+                        player.placePiece(rook,x,y,this.board)
+                    }
+                    
+
+                })
+                
+            }
             render() {
                 
                 let isGreen=false;
@@ -54,31 +89,25 @@ function gameController (){
             
         }
         class Players {
-            constructor(color,pieces) {
+            constructor(color) {
                 this.color=color
                 this.human=false;
+                this.pieces=[]
             }
             addToGame(board){
                 board.players.push(this)
             }
-            chooseSide (){
-                this.human=true;
-            }
-            createPieces(){
-                this.pieces=[]
-            }
-            displayPossibilities(){
 
+            createPiece(Class,type){
+                let newPiece= new Class(type,this.color)
+                this.pieces.push(newPiece)
+                return newPiece
             }
-            clearPossibilities(){
-
-            }
-
-            placePiece() {
-
+            placePiece(piece,x,y,board) {
+                board[x][y]=piece
             }
             chooseAttack() {
-
+                
             }
         }
         class Pieces{
@@ -86,6 +115,18 @@ function gameController (){
                 this.type=type;
                 this.color=color;
                 this.image=`../../public/images/pieces/${color} ${type}.png`;
+            }
+            checkIfEmpty (x,y, board) {
+                return board[x][y]===undefined?true: false;
+            }
+            checkIfEnemy (x,y,board) {
+                return board[x][y].color!==this.color?true:false;               
+            }
+            displayPossibilities(){
+    
+            }
+            clearPossibilities(){
+    
             }
             getPossibleMoves(){
 
@@ -103,7 +144,6 @@ function gameController (){
             super (type,color)
             }
             getPossibleMoves (coords,board) {
-                
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
                 let possibilities = [[x+1, y+2],[x+2,y+1],[x-1,y+2], [x-2,y+1], [x+1,y-2],[x+2,y-1], [x-2, y-1], [x-1,y-2]];
@@ -112,10 +152,9 @@ function gameController (){
                     //check if move possibility is inside bounds.
                     if (possibility[0] <= 7 && possibility[0]>=0 && possibility[1]<=7 && possibility[1]>=0){
                         //checks if square is empty or with enemy piece
-                        if (board[possibility[0]][possibility[1]]===undefined || (
-                            board[[possibility[0]]][[possibility[1]]]!==undefined &&
-                            board[possibility[0]][possibility[1]].color!==this.color
-                        )) {
+
+                        if (this.checkIfEmpty(possibility[0],possibility[1],board) || 
+                            this.checkIfEnemy(possibility[0],possibility[1],board)) {
                             moves.push(possibility)
                         } 
                     }
@@ -134,15 +173,13 @@ function gameController (){
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
                 let possibilities = [[x+1, y], [x+1, y+1], [x,y-1], [x-1,y], [x-1, y+1], [x-1, y-1], [x, y+1], [x, y-1]];
-
                 //validating moves
                 let legalMoves= possibilities.reduce((moves,possibility)=> {
                     //check if move possibility is inside bounds.
                     if (possibility[0] <= 7 && possibility[0]>=0 && possibility[1]<=7 && possibility[1]>=0){
                         //checks if square is empty or with enemy piece
-                        if (board[possibility[0]][possibility[1]]===undefined || (
-                            board[[possibility[0]]][[possibility[1]]]!==undefined &&
-                            board[possibility[0]][possibility[1]].color!==this.color
+                        if (this.checkIfEmpty(possibility[0],possibility[1],board) || (
+                            this.checkIfEnemy(possibility[0],possibility[1],board)
                         )) {
                             moves.push(possibility)
                         } 
@@ -150,10 +187,10 @@ function gameController (){
                     return moves;
                 },[])
                 //checking if space between king/rook is empty and adding castle possibility
-                if (board[x+2][y]===undefined && board[x+1][y]===undefined && this.start && board[x + 3][y]!==undefined && board[x + 3][y].start) {
+                if (this.start && this.checkIfEmpty(x+2,y,board) && this.checkIfEmpty(x+1,y,board) && board[x + 3][y] && board[x + 3][y].start) {
                     legalMoves.push([x+3,y])
                 }
-                if (board[x-1][y] && board[x-2][y] && board[x-3][y] && this.start && board[x - 4][y]!==undefined && board[x -4][y].start) {
+                if (this.start && this.checkIfEmpty(x-1,y,board) && this.checkIfEmpty(x-2,y,board) && this.checkIfEmpty(x-3,y,board) && board[x - 4][y]!==undefined && board[x -4][y].start) {
                     legalMoves.push([x-4,y])
                 }
                 return legalMoves;
@@ -166,41 +203,48 @@ function gameController (){
             }
             //static to reuse It on Queen
             static getPossibleMoves (coords,board) {
-                //must create 4 loops for each rook direction
-
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
                 let possibilities=[];
                 //going up
                 for (let i=1; y+i<8; i++) {
+                     if (this.prototype.checkIfEmpty(x,y+i,board)) {
+                        possibilities.push([x, y+i])
+                    } else if (this.prototype.checkIfEnemy(x,y+i,board)){
+                        possibilities.push([x, y+i]);
+                        //after pushing stop loop if piece is the enemy
+                        i=8
+                    } else {i=8;}
                     //stop loop and dont push after seing an ally piece
-                    board[x][y+i]!==undefined && board[x][y+i].color===this.color?i=8:possibilities.push([x, y+i])
-                    //after pushing stop loop if piece is the enemy
-                    if (board[x][y+i]!==undefined && board[x][y+i].color!==this.color) {
-                        i=8;
-                    }
                 }
                 //going down
                 for (let i=1; y-i>-1; i++) {
-                     board[x][y-i]!==undefined && board[x][y-i].color===this.color?i=8:possibilities.push([x, y-i])
-                    if (board[x][y-i]!==undefined && board[x][y-i].color!==this.color) {
-                        i=8;
-                    }
+                    if (this.prototype.checkIfEmpty(x,y-i,board)) {
+                        possibilities.push([x, y-i])
+                    } else if (this.prototype.checkIfEnemy(x,y-i,board)){
+                        possibilities.push([x, y-i]);
+                        i=8
+                    } else {i=8;}
                 }
+
                 //going right
                 for (let i=1; x+i<8; i++) {
-                    board[x+i][y]!==undefined && board[x+1][y].color===this.color?i=8:possibilities.push([x+i, y])
-                   if (board[x+i][y]!==undefined && board[x][y-i].color!==this.color) {
-                       i=8;
-                   }
-               }
+                    if (this.prototype.checkIfEmpty(x+i,y,board)) {
+                        possibilities.push([x+i, y])
+                    } else if (this.prototype.checkIfEnemy(x+i,y,board)){
+                        possibilities.push([x+i, y]);
+                        i=8
+                    } else {i=8;}
+                }
                //going left
                for (let i=1; x-i>-1; i++) {
-                    board[x-i][y]!==undefined && board[x-1][y].color===this.color?i=8:possibilities.push([x-i, y])
-                   if (board[x-i][y]!==undefined && board[x-i][y].color!==this.color) {
-                       i=8;
-                   }
-               }
+                if (this.prototype.checkIfEmpty(x-i,y,board)) {
+                    possibilities.push([x-i, y])
+                } else if (this.prototype.checkIfEnemy(x-i,y,board)){
+                    possibilities.push([x-i, y]);
+                     i=8
+                } else {i=8;}
+            }
                  return possibilities
             }
             // our instance also must have above func!
@@ -221,32 +265,46 @@ function gameController (){
                 let possibilities=[];
                 //up-right
                 for (let i=0; x+i<8 && y+i<8; i++) {
-                    board[x+i][y+i]!==undefined && board[x+i][y+i].color===this.color?i=8:possibilities.push([x+i, y+i])
-                    if (board[x+i][y+i]!==undefined && board[x+i][y+i].color!==this.color) {
-                        i=8;
-                    }
+                    if (this.prototype.checkIfEmpty(x+i,y+i,board)) {
+                        possibilities.push([x+i,y+i])
+                    } else if (this.prototype.checkIfEnemy(x+i,y+i,board)){
+                        possibilities.push([x+i,y+i]);
+                        //after pushing stop loop if piece is the enemy
+                        i=8
+                    } else {
+                        //stop loop and dont push after seing an ally piece
+                        i=8;}
                 }
                 //down-right
                 for (let i=0; x+i<8 && y-i>-1; i++) {
-                    board[x+i][y-i]!==undefined && board[x+i][y-i].color===this.color?i=8:possibilities.push([x+i, y-i])
-                    if (board[x+i][y-i]!==undefined && board[x+i][y-i].color!==this.color) {
-                        i=8;
-                    }
+                    if (this.prototype.checkIfEmpty(x+i,y-i,board)) {
+                        possibilities.push([x+i,y-i])
+                    } else if (this.prototype.checkIfEnemy(x+i,y-i,board)){
+                        possibilities.push([x+i,y-i]);
+                    i=8
+                    } else {
+                                                i=8;}
                 }
-
+            
                 //up-left
                 for (let i=0; x-i>-1 && y+i<8; i++) {
-                    board[x-i][y+i]!==undefined && board[x-i][y+i].color===this.color?i=8:possibilities.push([x-i, y+i])
-                    if (board[x-i][y+i]!==undefined && board[x-i][y+i].color!==this.color) {
-                        i=8;
-                    }
+                    if (this.prototype.checkIfEmpty(x-i,y+i,board)) {
+                        possibilities.push([x-i,y+i])
+                    } else if (this.prototype.checkIfEnemy(x-i,y+i,board)){
+                        possibilities.push([x-i,y+i]);
+                    i=8
+                    } else {
+                                                i=8;}
                 }
                 //down-left
                 for (let i=0; x-i>-1 && y-i>-1; i++) {
-                    board[x-i][y-i]!==undefined && board[x-i][y-i].color===this.color?i=8:possibilities.push([x-i, y-i])
-                    if (board[x-i][y-i]!==undefined && board[x-i][y-i].color!==this.color) {
-                        i=8;
-                    }
+                    if (this.prototype.checkIfEmpty(x-i,y-i,board)) {
+                        possibilities.push([x-i,y-i])
+                    } else if (this.prototype.checkIfEnemy(x-i,y-i,board)){
+                        possibilities.push([x-i,y-i]);
+                    i=8
+                    } else {
+                                                i=8;}
                 }
                 return possibilities;
             }
