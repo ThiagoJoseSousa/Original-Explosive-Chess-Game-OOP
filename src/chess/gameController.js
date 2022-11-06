@@ -7,7 +7,6 @@ function gameController (){
             this.players=[]
             this.table=document.getElementById("board")
             }
-
             cleanDOM(){
                 while (this.table.firstChild) {
                     this.table.removeChild(this.table.firstChild);
@@ -18,6 +17,10 @@ function gameController (){
                 this.players.push(whitePlayer)
                 let blackPlayer= new Players('black')
                 this.players.push(blackPlayer)
+                
+                // instructions to create repeating pieces
+                let pipe= [[Bishop,'bishop'],[Knight,'knight'],[Rook,'rook']]
+                
                 //creating pieces for each player
                 this.players.forEach((player,i)=>{
                     let y=i?6:1; // toggles y depending on which player to place pawn
@@ -32,19 +35,18 @@ function gameController (){
                     let queen=player.createPiece(Queen,'queen')
                     player.placePiece(queen,3,y,this.board) 
 
-                    // left/right side of queen/king
-                    for (let x=0, i=0;i<2;i++, x=5){
-                        let bishop=player.createPiece(Bishop,'bishop');
-                        player.placePiece(bishop,x+2,y,this.board)
-                        
-                        let knight=player.createPiece(Knight,'knight');
-                        player.placePiece(knight,x+1,y,this.board) 
-                        
-                        let rook=player.createPiece(Rook,'rook');
-                        player.placePiece(rook,x,y,this.board)
-                    }
-                    
-
+                    // Queen left side pieces
+                    let x=2; 
+                        pipe.reduce((prev,creator,i)=>{
+                            let piece =player.createPiece(creator[0],creator[1])
+                            player.placePiece(piece,x-i,y,this.board)
+                        },[]) 
+                    // King right side pieces
+                    x=5;
+                        pipe.reduce((prev,creator,i)=>{
+                        let piece =player.createPiece(creator[0],creator[1])
+                        player.placePiece(piece,x+i,y,this.board)
+                    },[]) 
                 })
                 
             }
@@ -79,7 +81,6 @@ function gameController (){
                     this.table.appendChild(tableRow);
                 }
             }
-
             checkForWin(){
                 
             }
@@ -94,10 +95,13 @@ function gameController (){
                 this.human=false;
                 this.pieces=[]
             }
-            addToGame(board){
-                board.players.push(this)
-            }
 
+            displayPossibilities(){
+    
+            }
+            clearPossibilities(){
+    
+            }
             createPiece(Class,type){
                 let newPiece= new Class(type,this.color)
                 this.pieces.push(newPiece)
@@ -121,15 +125,6 @@ function gameController (){
             }
             checkIfEnemy (x,y,board) {
                 return board[x][y].color!==this.color?true:false;               
-            }
-            displayPossibilities(){
-    
-            }
-            clearPossibilities(){
-    
-            }
-            getPossibleMoves(){
-
             }
             move() {
                 
