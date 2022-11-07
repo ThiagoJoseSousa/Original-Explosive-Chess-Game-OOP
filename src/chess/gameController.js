@@ -4,8 +4,9 @@ function gameController (){
         constructor (){
             this.board=[new Array(8),new Array(8),new Array(8),new Array(8),
             new Array(8),new Array(8),new Array(8),new Array(8)];    
-            this.players=[]
             this.table=document.getElementById("board")
+            this.players=[]
+            this.turn=0;// 0 is white
             }
             cleanDOM(){
                 while (this.table.firstChild) {
@@ -48,8 +49,8 @@ function gameController (){
                         player.placePiece(piece,x+i,y,this.board)
                     },[]) 
                 })
-                
-            }
+                setTimeout(()=> {this.changeTurn()},0);
+            }   //make turn logic?
             render() {
                 
                 let isGreen=false;
@@ -84,8 +85,15 @@ function gameController (){
             checkForWin(){
                 
             }
-            setTurn (){
+            changeTurn (){
+                if(this.turn===1) {
+                    this.players[1].humanCanClick(this.board)
+                    this.turn=0
+                }else{
+                    this.turn=1
+                    this.players[0].humanCanClick(this.board)
 
+                }
             }
             
         }
@@ -96,11 +104,39 @@ function gameController (){
                 this.pieces=[]
             }
 
-            displayPossibilities(){
-    
+            humanCanClick(board){
+                    this.pieces.forEach((item)=>{
+                    let piece=document.querySelector(`[data-coords="${item.coords[0]}${item.coords[1]}"]`)
+                    piece.classList.add('clickablePiece')
+                    piece.addEventListener('click', ()=>{
+                        console.log(item)
+                        // It'd be easier to get the element clicked by using e.target
+                        this.displayPossibilities(item,board)
+                    })
+                })
+            }
+            displayPossibilities(item,board){
+                //clear previous attacks display.
+                this.clearPossibilities();
+
+                // add grey marker for each possible move
+                let coords=`${item.coords[0]}${item.coords[1]}`
+                let possibleMoves=item.getPossibleMoves(coords,board)
+                    for (let i=0; i<possibleMoves.length;i++){
+                        let coord=possibleMoves[i]
+                        let square=document.querySelector(`[data-coords="${coord[0]}${coord[1]}"]`);
+                        let grey= document.createElement('div');
+                        grey.classList.add('grey');
+                        square.appendChild(grey)
+                    }
+                
             }
             clearPossibilities(){
-    
+                //clear attacks display
+                let possible=document.querySelectorAll('.grey')
+                for (let i =0; i<possible.length; i++){
+                    possible[i].parentElement.removeChild(possible[i])
+                }
             }
             createPiece(Class,type){
                 let newPiece= new Class(type,this.color)
@@ -108,6 +144,7 @@ function gameController (){
                 return newPiece
             }
             placePiece(piece,x,y,board) {
+                piece.coords=[x,y]
                 board[x][y]=piece
             }
             chooseAttack() {
@@ -124,6 +161,7 @@ function gameController (){
                 return board[x][y]===undefined?true: false;
             }
             checkIfEnemy (x,y,board) {
+                console.log(this.color,board[x][y].color)
                 return board[x][y].color!==this.color?true:false;               
             }
             move() {
@@ -196,16 +234,16 @@ function gameController (){
             constructor(type, color){
                 super (type,color) 
             }
-            //static to reuse It on Queen
-            static getPossibleMoves (coords,board) {
+
+             getPossibleMoves (coords,board) {
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
                 let possibilities=[];
                 //going up
                 for (let i=1; y+i<8; i++) {
-                     if (this.prototype.checkIfEmpty(x,y+i,board)) {
+                     if (this.checkIfEmpty(x,y+i,board)) {
                         possibilities.push([x, y+i])
-                    } else if (this.prototype.checkIfEnemy(x,y+i,board)){
+                    } else if (this.checkIfEnemy(x,y+i,board)){
                         possibilities.push([x, y+i]);
                         //after pushing stop loop if piece is the enemy
                         i=8
@@ -214,9 +252,9 @@ function gameController (){
                 }
                 //going down
                 for (let i=1; y-i>-1; i++) {
-                    if (this.prototype.checkIfEmpty(x,y-i,board)) {
+                    if (this.checkIfEmpty(x,y-i,board)) {
                         possibilities.push([x, y-i])
-                    } else if (this.prototype.checkIfEnemy(x,y-i,board)){
+                    } else if (this.checkIfEnemy(x,y-i,board)){
                         possibilities.push([x, y-i]);
                         i=8
                     } else {i=8;}
@@ -224,27 +262,23 @@ function gameController (){
 
                 //going right
                 for (let i=1; x+i<8; i++) {
-                    if (this.prototype.checkIfEmpty(x+i,y,board)) {
+                    if (this.checkIfEmpty(x+i,y,board)) {
                         possibilities.push([x+i, y])
-                    } else if (this.prototype.checkIfEnemy(x+i,y,board)){
+                    } else if (this.checkIfEnemy(x+i,y,board)){
                         possibilities.push([x+i, y]);
                         i=8
                     } else {i=8;}
                 }
                //going left
                for (let i=1; x-i>-1; i++) {
-                if (this.prototype.checkIfEmpty(x-i,y,board)) {
+                if (this.checkIfEmpty(x-i,y,board)) {
                     possibilities.push([x-i, y])
-                } else if (this.prototype.checkIfEnemy(x-i,y,board)){
+                } else if (this.checkIfEnemy(x-i,y,board)){
                     possibilities.push([x-i, y]);
                      i=8
                 } else {i=8;}
             }
                  return possibilities
-            }
-            // our instance also must have above func!
-            getPossibleMoves(coords,board) {
-                return Rook.getPossibleMoves(coords,board)
             }
         }
 
@@ -252,17 +286,17 @@ function gameController (){
             constructor(type,color){
                 super(type,color)
             }
-            //static to reuse It on Queen
-            static getPossibleMoves(coords,board){
+
+             getPossibleMoves(coords,board){
                 //same logic as rook
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
                 let possibilities=[];
                 //up-right
-                for (let i=0; x+i<8 && y+i<8; i++) {
-                    if (this.prototype.checkIfEmpty(x+i,y+i,board)) {
+                for (let i=1; x+i<8 && y+i<8; i++) {
+                    if (this.checkIfEmpty(x+i,y+i,board)) {
                         possibilities.push([x+i,y+i])
-                    } else if (this.prototype.checkIfEnemy(x+i,y+i,board)){
+                    } else if (this.checkIfEnemy(x+i,y+i,board)){
                         possibilities.push([x+i,y+i]);
                         //after pushing stop loop if piece is the enemy
                         i=8
@@ -271,10 +305,10 @@ function gameController (){
                         i=8;}
                 }
                 //down-right
-                for (let i=0; x+i<8 && y-i>-1; i++) {
-                    if (this.prototype.checkIfEmpty(x+i,y-i,board)) {
+                for (let i=1; x+i<8 && y-i>-1; i++) {
+                    if (this.checkIfEmpty(x+i,y-i,board)) {
                         possibilities.push([x+i,y-i])
-                    } else if (this.prototype.checkIfEnemy(x+i,y-i,board)){
+                    } else if (this.checkIfEnemy(x+i,y-i,board)){
                         possibilities.push([x+i,y-i]);
                     i=8
                     } else {
@@ -282,20 +316,20 @@ function gameController (){
                 }
             
                 //up-left
-                for (let i=0; x-i>-1 && y+i<8; i++) {
-                    if (this.prototype.checkIfEmpty(x-i,y+i,board)) {
+                for (let i=1; x-i>-1 && y+i<8; i++) {
+                    if (this.checkIfEmpty(x-i,y+i,board)) {
                         possibilities.push([x-i,y+i])
-                    } else if (this.prototype.checkIfEnemy(x-i,y+i,board)){
+                    } else if (this.checkIfEnemy(x-i,y+i,board)){
                         possibilities.push([x-i,y+i]);
                     i=8
                     } else {
                                                 i=8;}
                 }
                 //down-left
-                for (let i=0; x-i>-1 && y-i>-1; i++) {
-                    if (this.prototype.checkIfEmpty(x-i,y-i,board)) {
+                for (let i=1; x-i>-1 && y-i>-1; i++) {
+                    if (this.checkIfEmpty(x-i,y-i,board)) {
                         possibilities.push([x-i,y-i])
-                    } else if (this.prototype.checkIfEnemy(x-i,y-i,board)){
+                    } else if (this.checkIfEnemy(x-i,y-i,board)){
                         possibilities.push([x-i,y-i]);
                     i=8
                     } else {
@@ -303,21 +337,22 @@ function gameController (){
                 }
                 return possibilities;
             }
-            // our instance also must have above func!
-            getPossibleMoves(coords,board){
-                return Bishop.getPossibleMoves(coords,board)
-            }
+
         }
         class Queen extends Pieces {
             constructor(type,color) {
                 super(type,color)
+                this.rookMoves=Rook.prototype.getPossibleMoves;
+                this.bishopMoves=Bishop.prototype.getPossibleMoves;
             }
             getPossibleMoves(coords,board) {
                 let legalMoves=[]
-                Rook.getPossibleMoves(coords,board).forEach((item)=>{
+                //combine rook and bishop moves to make queen
+
+                this.rookMoves(coords,board).forEach((item)=>{
                     legalMoves.push(item)
                 })
-                Bishop.getPossibleMoves(coords,board).forEach((item)=>{
+                this.bishopMoves(coords,board).forEach((item)=>{
                     legalMoves.push(item)
                 })
                 return legalMoves;
@@ -333,36 +368,44 @@ function gameController (){
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
                 let possibilities = {
-                    //first and second elements from arraylist have a extra element for special rules (en pasant and 2 square move)
-                    white: [[x+1,x-1,y+1],[x,y+2, y+1],[x,y+1],[x+1,y+1],[x-1,y+1]],
-                    black: [[x+1,x-1,y-1],[x,y-2, y-1],[x,y-1],[x+1,y-1],[x-1,y-1]]
+                    white: [[x,y+1],[x+1,y+1],[x-1,y+1]],
+                    black: [[x,y-1],[x+1,y-1],[x-1,y-1]],
                 };
-                return possibilities[this.color].reduce(
-                    (prev,curr,i)=> {
-                        //checking if inside board
-                        if (curr[0]>-1 && curr[0]<8 && curr[1]>-1 && curr[1]<8){
-                            //en pasant rule
-                            if (i===0 && board[curr[0]][y] && board[curr[0]][y].enpasant && board[curr[0]][y].color!==this.color){
-                                prev.push([curr[0],curr[2]])
-                            } else if (i===0 && board[curr[1]][y] && board[curr[1]][y].enpasant && board[curr[1]][y].color!==this.color){
-                                prev.push([curr[1],curr[2]])
-                            }
-                            //2 squares move
-                            if (i===1 && this.start && !board[curr[0]][curr[1]] && !board[curr[0]][curr[2]]){
-                                prev.push([curr[0],curr[1]])
-                            }
-                            //checking if can go straight
-                            if (i===2 && !board[curr[0]][curr[1]]){
-                                prev.push(curr)
-                             } 
-                             //checking if can attack
-                            if (board[curr[0]][curr[1]]!==undefined && board[curr[0]][curr[1]]!==this.color) {
-                                prev.push(curr)
-                            }
+                //basic moves, going straight into ++y or --y or capturing.
+                let allMoves= possibilities[this.color].reduce((prev,coord,i)=>{
+                    //check if in bounds
+                    if (coord[0]<8 && coord[0]>-1 && coord[1]<8 && coord[1]>-1){
+                        if (this.checkIfEmpty(coord[0],coord[1],board)) {
+                            // pushing only if moving straight
+                            if (i===0){prev.push([coord[0],coord[1]])}
+                        }else if (this.checkIfEnemy(coord[0],coord[1],board)){
+                            //if not empty, check if enemy, pushing if It is
+                            prev.push([coord[0],coord[1]])
                         }
-                        return prev
-                    },[]
-                )
+                    }
+                    return prev
+                },[])
+                //special rules : 2 squares move
+                if (this.start && this.color==='white' && this.checkIfEmpty(x,y+1,board) && this.checkIfEmpty(x,y+2,board)) {
+                    allMoves.push([x,y+2])
+                }
+                if (this.start && this.color==='black' && this.checkIfEmpty(x,y-1,board) && this.checkIfEmpty(x,y-2,board)) {
+                    allMoves.push([x,y-2])
+                }
+                //special rules : en pasant attack
+                if (this.checkIfEnpasant(x+1,y,board)) {
+                    allMoves.push([])
+                }
+
+
+                return allMoves
+            }
+
+            checkIfEnpasant(x,y,board) {
+                if (x>-1 && x<8 && y>-1 && y<8 && board[x][y]!== undefined && board[x][y].enpasant && board[x][y].color!==this.color){
+                    return true
+                }
+                return false
             }
 
             promote (){

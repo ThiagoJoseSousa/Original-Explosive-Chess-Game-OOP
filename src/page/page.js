@@ -57,11 +57,12 @@ function startGame(e) {
     console.log(bishop.getPossibleMoves('33',gameboard.board), 'bishop')
     let queen= new game.Queen('Queen','white')
     console.log(queen.getPossibleMoves('33',gameboard.board),'queen')
-    let pawn =new game.Pawn('Pawn','black')
+    let pawn =new game.Pawn('Pawn','black') // its a black pawn
     let whitepawn =new game.Pawn('Pawn','white');
     whitepawn.enpasant=true; // <- Its right
+    gameboard.board[1][2]=whitepawn;
     gameboard.board[4][3]=whitepawn;
-    console.log(pawn.getPossibleMoves('33',gameboard.board),'pawn')
+    console.log('if its bugged 12 wont show up',pawn.getPossibleMoves('03',gameboard.board),'pawn')
     console.log(rook)
     gameboard.start()
     gameboard.render()

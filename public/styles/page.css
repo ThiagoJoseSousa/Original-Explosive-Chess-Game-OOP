@@ -305,3 +305,13 @@ td.board-square{
 #chooseSide p {
     text-align: center;
 }
+
+.clickablePiece {
+    cursor:pointer;
+}
+
+.grey {
+    background-color: antiquewhite;
+    width: 40%;
+    height:40%;
+}
