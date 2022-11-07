@@ -4,6 +4,7 @@ function gameController (){
         constructor (){
             this.board=[new Array(8),new Array(8),new Array(8),new Array(8),
             new Array(8),new Array(8),new Array(8),new Array(8)];    
+            this.board.instance=this;
             this.table=document.getElementById("board")
             this.players=[]
             this.turn=0;// 0 is white
@@ -14,9 +15,9 @@ function gameController (){
                   }
             }
             start () {
-                let whitePlayer= new Players('white')
+                let whitePlayer= new Players('white',this.board)
                 this.players.push(whitePlayer)
-                let blackPlayer= new Players('black')
+                let blackPlayer= new Players('black',this.board)
                 this.players.push(blackPlayer)
                 
                 // instructions to create repeating pieces
@@ -118,13 +119,17 @@ function gameController (){
             displayPossibilities(item,board){
                 //clear previous attacks display.
                 this.clearPossibilities();
-
-                // add grey marker for each possible move
+                //remembers which piece you clicked to display
+                this.displaying=item;
+                // add grey marker and play listener for each possible move
                 let coords=`${item.coords[0]}${item.coords[1]}`
                 let possibleMoves=item.getPossibleMoves(coords,board)
                     for (let i=0; i<possibleMoves.length;i++){
                         let coord=possibleMoves[i]
                         let square=document.querySelector(`[data-coords="${coord[0]}${coord[1]}"]`);
+                        square.addEventListener('click', (e)=> {
+                            play.call(this,e,board)
+                        } )
                         let grey= document.createElement('div');
                         grey.classList.add('grey');
                         square.appendChild(grey)
@@ -135,7 +140,12 @@ function gameController (){
                 //clear attacks display
                 let possible=document.querySelectorAll('.grey')
                 for (let i =0; i<possible.length; i++){
-                    possible[i].parentElement.removeChild(possible[i])
+                    //removing grey without removing img by setting cloneNode deep to true
+                    let square=possible[i].parentElement
+                    square.removeChild(possible[i])
+                    // cloning the element so it gets the listener to play removed
+                    const dup=square.cloneNode();
+                    square.replaceWith(dup)
                 }
             }
             createPiece(Class,type){
@@ -150,6 +160,7 @@ function gameController (){
             chooseAttack() {
                 
             }
+            
         }
         class Pieces{
             constructor(type,color) {
@@ -412,7 +423,25 @@ function gameController (){
 
             }
         }
-    
+        function play (e,board){
+            console.log(e.target.dataset.coords) // gets destiny
+            console.log(this)
+            console.log(board, 'this is the board, does it have constructor?')
+            const oldX= this.displaying.coords[0];
+            const oldY=this.displaying.coords[1];
+            const newX= Number(e.target.dataset.coords[0]);
+            const newY= Number(e.target.dataset.coords[1]);
+            //moving piece
+            console.log(oldX,oldY,newX,newY)
+            //recreates the square so we dont change the original obj
+            board[oldX].splice(oldY,1,undefined) 
+            this.placePiece(this.displaying,newX,newY,board)
+            //I've created instance property on the array just for the render
+            board.instance.cleanDOM()
+            board.instance.render()
+            board.instance.changeTurn()
+        }
+
         return {Gameboard,Knight,King, Rook, Bishop, Queen,Pawn}
     }
 
