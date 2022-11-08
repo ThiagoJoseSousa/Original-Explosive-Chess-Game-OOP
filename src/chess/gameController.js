@@ -428,18 +428,17 @@ function gameController (){
                 return false
             }
 
-            checkIfCanPromote(){
+            checkIfCanPromote(board){
                 if (this.coords[1]===0 || this.coords[1]===7) {
-                    this.promoteBox()
+                    this.promoteBox(board)
                 }
             }
 
-            promoteBox(){
+            promoteBox(board){
                 //UI creation
                 const promotingSquare=document.querySelector(`[data-coords="${this.coords[0]}${this.coords[1]}"]`)
                 const choiceBox= document.createElement('div');
-                choiceBox.classList.add('choiceBox');
-                let piece=this;
+                choiceBox.classList.add('promotingChoiceBox');
                 // pieces which u can choose 
                 const piecesOption= [
                     [Bishop,'bishop'],[Knight,'knight'],[Pawn,'pawn'],[Queen,'queen'],[Rook,'rook']
@@ -447,16 +446,26 @@ function gameController (){
                 for (let i=0; i<piecesOption.length; i++) {
                     const choiceImg=document.createElement('img');
                     choiceImg.setAttribute('src', `../../public/images/pieces/${this.color} ${piecesOption[i][1]}.png`)
-                    choiceImg.addEventListener('click', ()=> {
-                        this.promote(piece,piecesOption[i][0])
+                    choiceImg.addEventListener('click', (e)=> {
+                        this.promote(piecesOption[i][0],piecesOption[i][1],board);
+                        e.stopPropagation();
                     })
                     choiceBox.appendChild(choiceImg)
                 }
                 promotingSquare.appendChild(choiceBox)
             }
 
-            promote (oldPiece,classOfPromotedPiece){
-                oldPiece = new classOfPromotedPiece
+            promote (classOfPromotedPiece,type,board){
+                console.log(this, 'Before creating a new obj')
+                let promoted = new classOfPromotedPiece(type,this.color)
+                let piece = this;
+                // couldnt get rid of prototype :/ so had to put the new func as property
+                piece.getPossibleMoves=promoted.getPossibleMoves
+                piece.checkIfCanPromote=false;
+                //copying properties, an object can't be replaced by reference.
+                Object.assign(piece,promoted)
+                console.log(this, 'After creating a new obj')
+                otherCanPlay(board)
             }
         }
         function play (e,board){
@@ -478,7 +487,8 @@ function gameController (){
                 //normal attack
                 this.normalAttack(newX,newY,board)
                 }
-                otherCanPlay(board)
+                //otherCanPlay(board)
+                this.displaying.promoteBox(board)
         }
         function otherCanPlay(board){
             board.parent.cleanDOM()

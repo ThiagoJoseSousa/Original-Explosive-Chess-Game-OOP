@@ -317,3 +317,21 @@ td.board-square{
     pointer-events: none;
 
 }
+div.promotingChoiceBox{
+    border-style: solid;
+    background-color: blue;
+    position: absolute;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border-width:5px;
+}
+div.promotingChoiceBox img{
+    width:70px;
+    height:70px;
+}
+
+div.promotingChoiceBox img:hover{
+    cursor:pointer;
+}
