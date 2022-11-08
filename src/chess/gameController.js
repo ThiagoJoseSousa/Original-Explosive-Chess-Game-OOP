@@ -4,7 +4,7 @@ function gameController (){
         constructor (){
             this.board=[new Array(8),new Array(8),new Array(8),new Array(8),
             new Array(8),new Array(8),new Array(8),new Array(8)];    
-            this.board.instance=this;
+            this.board.parent=this;
             this.table=document.getElementById("board")
             this.players=[]
             this.turn=0;// 0 is white
@@ -107,13 +107,16 @@ function gameController (){
 
             humanCanClick(board){
                     this.pieces.forEach((item)=>{
-                    let piece=document.querySelector(`[data-coords="${item.coords[0]}${item.coords[1]}"]`)
-                    piece.classList.add('clickablePiece')
-                    piece.addEventListener('click', ()=>{
-                        console.log(item)
-                        // It'd be easier to get the element clicked by using e.target
-                        this.displayPossibilities(item,board)
-                    })
+                    if (!item.dead) {
+
+                        let piece=document.querySelector(`[data-coords="${item.coords[0]}${item.coords[1]}"]`)
+                        piece.classList.add('clickablePiece')
+                        piece.addEventListener('click', ()=>{
+                            console.log(item)
+                            // It'd be easier to get the element clicked by using e.target
+                            this.displayPossibilities(item,board)
+                        })
+                    }
                 })
             }
             displayPossibilities(item,board){
@@ -143,9 +146,10 @@ function gameController (){
                     //removing grey without removing img by setting cloneNode deep to true
                     let square=possible[i].parentElement
                     square.removeChild(possible[i])
-                    // cloning the element so it gets the listener to play removed
-                    const dup=square.cloneNode();
+                    // cloning the element so it gets the play listener removed
+                    const dup=square.cloneNode(true)
                     square.replaceWith(dup)
+                    console.log(dup, ' do i have img?')
                 }
             }
             createPiece(Class,type){
@@ -159,6 +163,11 @@ function gameController (){
             }
             chooseAttack() {
                 
+            }
+            normalAttack(newX,newY,board){
+                board[newX][newY].dead=true;
+                board[newX].splice(newY,1,this.displaying) 
+                this.displaying.coords=[newX,newY]
             }
             
         }
@@ -419,13 +428,41 @@ function gameController (){
                 return false
             }
 
-            promote (){
+            checkIfCanPromote(){
+                if (this.coords[1]===0 || this.coords[1]===7) {
+                    this.promoteBox()
+                }
+            }
 
+            promoteBox(){
+                //UI creation
+                const promotingSquare=document.querySelector(`[data-coords="${this.coords[0]}${this.coords[1]}"]`)
+                const choiceBox= document.createElement('div');
+                choiceBox.classList.add('choiceBox');
+                let piece=this;
+                // pieces which u can choose 
+                const piecesOption= [
+                    [Bishop,'bishop'],[Knight,'knight'],[Pawn,'pawn'],[Queen,'queen'],[Rook,'rook']
+                ];
+                for (let i=0; i<piecesOption.length; i++) {
+                    const choiceImg=document.createElement('img');
+                    choiceImg.setAttribute('src', `../../public/images/pieces/${this.color} ${piecesOption[i][1]}.png`)
+                    choiceImg.addEventListener('click', ()=> {
+                        this.promote(piece,piecesOption[i][0])
+                    })
+                    choiceBox.appendChild(choiceImg)
+                }
+                promotingSquare.appendChild(choiceBox)
+            }
+
+            promote (oldPiece,classOfPromotedPiece){
+                oldPiece = new classOfPromotedPiece
             }
         }
         function play (e,board){
             console.log(e.target.dataset.coords) // gets destiny
             console.log(this)
+            //the this of play is the instance of player, changed by using call().
             console.log(board, 'this is the board, does it have constructor?')
             const oldX= this.displaying.coords[0];
             const oldY=this.displaying.coords[1];
@@ -435,11 +472,18 @@ function gameController (){
             console.log(oldX,oldY,newX,newY)
             //recreates the square so we dont change the original obj
             board[oldX].splice(oldY,1,undefined) 
-            this.placePiece(this.displaying,newX,newY,board)
-            //I've created instance property on the array just for the render
-            board.instance.cleanDOM()
-            board.instance.render()
-            board.instance.changeTurn()
+            if (this.displaying.checkIfEmpty(newX,newY,board)){
+                this.placePiece(this.displaying,newX,newY,board)
+            } else{ 
+                //normal attack
+                this.normalAttack(newX,newY,board)
+                }
+                otherCanPlay(board)
+        }
+        function otherCanPlay(board){
+            board.parent.cleanDOM()
+            board.parent.render()
+            board.parent.changeTurn()
         }
 
         return {Gameboard,Knight,King, Rook, Bishop, Queen,Pawn}
