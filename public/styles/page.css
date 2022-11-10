@@ -315,7 +315,7 @@ td.board-square{
     width: 40%;
     height:40%;
     pointer-events: none;
-
+    
 }
 div.promotingChoiceBox{
     border-style: solid;
@@ -334,4 +334,39 @@ div.promotingChoiceBox img{
 
 div.promotingChoiceBox img:hover{
     cursor:pointer;
+}
+
+div#choiceBox {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    row-gap: 190px;
+}
+div#choiceBox button{
+    font-family: Arial, Helvetica, sans-serif;
+    opacity: 80%;
+    border-style: solid;
+    border-color: rgb(255, 0, 0);
+    border-width: 8px;
+    width: 210px;
+    font-size: 1.5em;
+    line-height: 1.5em;
+    color: red;
+    display:flex;
+    align-items: center;
+}
+div#choiceBox button:hover{
+    transition:font-weight;
+    opacity: 100%;
+    font-weight: bolder;
+}
+
+
+.dying-square .grey{
+    background-color: red;
+}
+
+div#choiceBox button img{
+    width:40px;
+    height:90%;
 }

@@ -51,7 +51,7 @@ function gameController (){
                     },[]) 
                 })
                 setTimeout(()=> {this.changeTurn()},0);
-            }   //make turn logic?
+            }   
             render() {
                 
                 let isGreen=false;
@@ -161,12 +161,45 @@ function gameController (){
                 piece.coords=[x,y]
                 board[x][y]=piece
             }
-            chooseAttack() {
+            attackChoice(newX,newY,board) {
+                //UI to display attack choice
+                const square=document.querySelector(`[data-coords="${newX}${newY}"]`)
+                square.classList.add('dying-square')
                 
+                const choiceBox=document.createElement('div');
+                choiceBox.setAttribute('id','choiceBox')
+
+                const normalAttack=document.createElement('button');
+                normalAttack.textContent="SWORD ATTACK!"
+                normalAttack.addEventListener('click',(e) => {this.normalAttack(newX,newY,board); 
+                    e.stopPropagation() // click cant bubble
+                    otherCanPlay(board)
+                }
+                )
+                const normalAttackImg =document.createElement('img');
+                normalAttackImg.setAttribute('src','../../public/images/sword.png')
+                
+
+                const explodeAttack= document.createElement('button');
+                explodeAttack.textContent= "DYNAMITE ATTACK!"
+                explodeAttack.addEventListener('click', (e) => {
+                    explode(newX,newY,board)
+                    e.stopPropagation();
+                    otherCanPlay(board);
+                })
+                const explodeAttackImg =document.createElement('img');
+                explodeAttackImg.setAttribute('src',`../../public/images/dynamite.png`)
+
+                normalAttack.appendChild(normalAttackImg);
+                explodeAttack.appendChild(explodeAttackImg)
+
+                choiceBox.appendChild(normalAttack);
+                choiceBox.appendChild(explodeAttack);
+                square.appendChild(choiceBox);
             }
             normalAttack(newX,newY,board){
                 board[newX][newY].dead=true;
-                board[newX].splice(newY,1,this.displaying) 
+                board[newX][newY]=this.displaying 
                 this.displaying.coords=[newX,newY]
             }
             
@@ -184,13 +217,6 @@ function gameController (){
                 console.log(this.color,board[x][y].color)
                 return board[x][y].color!==this.color?true:false;               
             }
-            move() {
-                
-            }
-            explode(){
-
-            }
-            
         }
         class Knight extends Pieces {
             constructor(type,color) {
@@ -225,7 +251,7 @@ function gameController (){
             getPossibleMoves (coords,board) {
                 let x = parseInt(coords[0], 10);
                 let y = parseInt(coords[1], 10);
-                let possibilities = [[x+1, y], [x+1, y+1], [x,y-1], [x-1,y], [x-1, y+1], [x-1, y-1], [x, y+1], [x, y-1]];
+                let possibilities = [[x+1, y], [x+1, y+1], [x,y-1], [x-1,y], [x-1, y+1], [x-1, y-1], [x, y+1], [x+1, y-1]];
                 //validating moves
                 let legalMoves= possibilities.reduce((moves,possibility)=> {
                     //check if move possibility is inside bounds.
@@ -467,8 +493,13 @@ function gameController (){
                 console.log(this, 'After creating a new obj')
                 otherCanPlay(board)
             }
+            promotingMove () {
+                if (this.checkIfEmpty(newX,newY,board)) {
+                    
+                }
+            }
         }
-        function play (e,board){
+        function playAndCheckIfPawnPromotingAndCheckAttackingAndCheckPlacingPiece (e,board){
             console.log(e.target.dataset.coords) // gets destiny
             console.log(this)
             //the this of play is the instance of player, changed by using call().
@@ -477,24 +508,48 @@ function gameController (){
             const oldY=this.displaying.coords[1];
             const newX= Number(e.target.dataset.coords[0]);
             const newY= Number(e.target.dataset.coords[1]);
-            //moving piece
-            console.log(oldX,oldY,newX,newY)
-            //recreates the square so we dont change the original obj
-            board[oldX].splice(oldY,1,undefined) 
+            //setting start position to false
+            this.displaying.start=false;
+            // add promotion condition
+            //changes the old place pointer
+            board[oldX][oldY]=undefined 
             if (this.displaying.checkIfEmpty(newX,newY,board)){
                 this.placePiece(this.displaying,newX,newY,board)
+                otherCanPlay(board)
             } else{ 
                 //normal attack
-                this.normalAttack(newX,newY,board)
+                //this.normalAttack(newX,newY,board)
+                this.attackChoice(newX,newY,board)
                 }
-                //otherCanPlay(board)
-                this.displaying.promoteBox(board)
+                //this.attackChoice(newX,newY,board)
+                //this.displaying.promoteBox(board)
         }
         function otherCanPlay(board){
             board.parent.cleanDOM()
             board.parent.render()
             board.parent.changeTurn()
         }
+        function explode (newX,newY,board){
+            const possibleExploding=[[newX,newY],[newX+1,newY],[newX+1,newY+1],[newX+1,newY-1],[newX,newY+1],[newX,newY-1],[newX-1,newY+1],[newX-1,newY],[newX-1,newY-1]]
+            //check if inside board
+            let legalExploding= possibleExploding.filter((item) => {
+                return item[0]>-1 && item[0]<8 && item[1]>-1 && item[1]<8
+            })
+            //set piece to dead and take out of the board
+            for (let i=0; i<legalExploding.length; i++) {
+                let acessedSquare= board[legalExploding[i][0]][legalExploding[i][1]];
+                if (acessedSquare!==undefined) {
+                    acessedSquare.dead=true;
+                    //changing board pointer
+                    board[legalExploding[i][0]][legalExploding[i][1]]=undefined;
+                }
+
+            }
+        }
+        function play(fn, newX,newY,board){
+
+        }
+
 
         return {Gameboard,Knight,King, Rook, Bishop, Queen,Pawn}
     }
