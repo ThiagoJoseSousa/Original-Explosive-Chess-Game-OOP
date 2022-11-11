@@ -84,8 +84,11 @@ function gameController (){
                     this.table.appendChild(tableRow);
                 }
             }
-            checkForWin(){
-                
+            checkForEnd(){
+                if (this.players[0].pieces[8].dead || this.players[1].pieces[8].dead) {
+                    return true
+                }
+
             }
             changeTurn (){
                 if(this.turn===1) {
@@ -191,9 +194,12 @@ function gameController (){
                 const explodeAttack= document.createElement('button');
                 explodeAttack.textContent= "DYNAMITE ATTACK!"
                 explodeAttack.addEventListener('click', (e) => {
+                    this.displaying.dead=true;
+                    board[newX][newY].dead=true;
                     explode(newX,newY,board)
                     e.stopPropagation();
                     otherCanPlay(board);
+                    document.querySelector(`[data-coords="${newX}${newY}"]`).classList.add('exploding')
                 })
                 const explodeAttackImg =document.createElement('img');
                 explodeAttackImg.setAttribute('src',`../../public/images/dynamite.png`)
@@ -275,10 +281,10 @@ function gameController (){
                 },[])
                 //checking if space between king/rook is empty and adding castle possibility
                 if (this.start && this.checkIfEmpty(x+2,y,board) && this.checkIfEmpty(x+1,y,board) && board[x + 3][y] && board[x + 3][y].start) {
-                    legalMoves.push([x+3,y])
+                    legalMoves.push([x+2,y])
                 }
                 if (this.start && this.checkIfEmpty(x-1,y,board) && this.checkIfEmpty(x-2,y,board) && this.checkIfEmpty(x-3,y,board) && board[x - 4][y]!==undefined && board[x -4][y].start) {
-                    legalMoves.push([x-4,y])
+                    legalMoves.push([x-2,y])
                 }
                 return legalMoves;
             }
@@ -287,6 +293,7 @@ function gameController (){
         class Rook extends Pieces {
             constructor(type, color){
                 super (type,color) 
+                this.start=true;
             }
 
              getPossibleMoves (coords,board) {
@@ -432,7 +439,7 @@ function gameController (){
                         if (this.checkIfEmpty(coord[0],coord[1],board)) {
                             // pushing only if moving straight
                             if (i===0){prev.push([coord[0],coord[1]])}
-                        }else if (this.checkIfEnemy(coord[0],coord[1],board)){
+                        }else if (i!==0 && this.checkIfEnemy(coord[0],coord[1],board)){
                             //if not empty, check if enemy, pushing if It is
                             prev.push([coord[0],coord[1]])
                         }
@@ -516,6 +523,7 @@ function gameController (){
                 // couldnt get rid of prototype :/ so had to put the new func as property
                 piece.getPossibleMoves=promoted.getPossibleMoves
                 piece.promoted=true;
+                promoted.start=false;
                 //copying properties, an object can't be replaced by reference.
                 Object.assign(piece,promoted)
                 console.log(this, 'After creating a new obj')
@@ -558,6 +566,10 @@ function gameController (){
         function otherCanPlay(board){
             board.parent.cleanDOM()
             board.parent.render()
+            if (board.parent.checkForEnd()) {
+                alert('game has ended')
+                return
+            }
             board.parent.changeTurn()
         }
         function explode (newX,newY,board){

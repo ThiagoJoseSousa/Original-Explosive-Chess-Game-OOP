@@ -370,3 +370,24 @@ div#choiceBox button img{
     width:40px;
     height:90%;
 }
+
+@keyframes exploding {
+    0%{
+    border-style:solid;
+    border-width: 10px;
+    border-radius: 50%;}
+    100%{
+        border-style:solid;
+    transform: scale(3);
+    border-color: rgb(255, 2, 2);
+    border-width: 10px;
+    border-radius: 50%;
+    background: orange;
+    overflow:hidden;
+    }
+  }
+
+.exploding{ 
+    animation-name: exploding;
+    animation-duration: 1s;
+}
