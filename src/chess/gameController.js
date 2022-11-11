@@ -25,29 +25,30 @@ function gameController (){
                 
                 //creating pieces for each player
                 this.players.forEach((player,i)=>{
-                    let y=i?6:1; // toggles y depending on which player to place pawn
+                    let y=i?6:1; // toggles y depending on which player to place pawn, 0 is false
+
                     for (let i=0, x=0; i<8; i++){
                         let pawn=player.createPiece(Pawn,'pawn')
-                        player.placePiece(pawn,x+i,y,this.board)
+                        placePiece(pawn,x+i,y,this.board)
                     }
                     y= i?7:0; // toggles y value to place other pieces
                     let king=player.createPiece(King,'king')
-                    player.placePiece(king,4,y,this.board)
+                    placePiece(king,4,y,this.board)
 
                     let queen=player.createPiece(Queen,'queen')
-                    player.placePiece(queen,3,y,this.board) 
+                    placePiece(queen,3,y,this.board) 
 
                     // Queen left side pieces
                     let x=2; 
                         pipe.reduce((prev,creator,i)=>{
                             let piece =player.createPiece(creator[0],creator[1])
-                            player.placePiece(piece,x-i,y,this.board)
+                            placePiece(piece,x-i,y,this.board)
                         },[]) 
                     // King right side pieces
                     x=5;
                         pipe.reduce((prev,creator,i)=>{
                         let piece =player.createPiece(creator[0],creator[1])
-                        player.placePiece(piece,x+i,y,this.board)
+                        placePiece(piece,x+i,y,this.board)
                     },[]) 
                 })
                 setTimeout(()=> {this.changeTurn()},0);
@@ -157,11 +158,7 @@ function gameController (){
                 this.pieces.push(newPiece)
                 return newPiece
             }
-            placePiece(piece,x,y,board) {
-                piece.coords=[x,y]
-                board[x][y]=piece
-            }
-            attackChoice(newX,newY,board) {
+            attackChoice(newX,newY,board,promoting=false) {
                 //UI to display attack choice
                 const square=document.querySelector(`[data-coords="${newX}${newY}"]`)
                 square.classList.add('dying-square')
@@ -171,9 +168,20 @@ function gameController (){
 
                 const normalAttack=document.createElement('button');
                 normalAttack.textContent="SWORD ATTACK!"
-                normalAttack.addEventListener('click',(e) => {this.normalAttack(newX,newY,board); 
+                normalAttack.addEventListener('click',(e) => {
+                    if (promoting){
+
+                        this.displaying.coords=[newX,newY]
+                        console.log(board[newX][newY], 'new square')
+
+                        otherCanPlay(board)
+                    } else {
+                        board[newX][newY].dead=true;
+                        board[newX][newY]=this.displaying;
+                        this.displaying.coords=[newX,newY]
+                        otherCanPlay(board)
+                    }
                     e.stopPropagation() // click cant bubble
-                    otherCanPlay(board)
                 }
                 )
                 const normalAttackImg =document.createElement('img');
@@ -454,13 +462,23 @@ function gameController (){
                 return false
             }
 
-            checkIfCanPromote(board){
-                if (this.coords[1]===0 || this.coords[1]===7) {
+            promotingOrAttacking (newX,newY,board,player) {
+                //if just promoting
+                if (this.checkIfEmpty(newX,newY,board)) {
+                    console.log(this, 'Im happening everytime')
+                    placePiece(this,newX,newY,board)
                     this.promoteBox(board)
+                } else {
+                    // function must be async, promotebox is rendered, on click it re renders board, but with attackchoice
+                    board[newX][newY].dead=true;
+                    console.log (board[newX][newY], 'piece that is dead')
+                    placePiece(this, newX, newY, board)
+                    this.promoteBox(board,true,player);
+                    // thought of bubbling up too.
                 }
             }
 
-            promoteBox(board){
+            promoteBox(board,attacking=false,player){
                 //UI creation
                 const promotingSquare=document.querySelector(`[data-coords="${this.coords[0]}${this.coords[1]}"]`)
                 const choiceBox= document.createElement('div');
@@ -473,33 +491,41 @@ function gameController (){
                     const choiceImg=document.createElement('img');
                     choiceImg.setAttribute('src', `../../public/images/pieces/${this.color} ${piecesOption[i][1]}.png`)
                     choiceImg.addEventListener('click', (e)=> {
+                        e.stopPropagation()
                         this.promote(piecesOption[i][0],piecesOption[i][1],board);
-                        e.stopPropagation();
+                        // if attacking, display the attackChoice after promoting
+                        if (attacking) {
+                            board.parent.cleanDOM();
+                            board.parent.render();
+                            console.log(this.coords[0],this.coords[1],board, 'Im the arguemnts for attackchoice')
+                            player.attackChoice(this.coords[0],this.coords[1],board,true)
+                            console.log(board[this.coords[0]][this.coords[1]])
+                        } else {
+                            otherCanPlay(board)
+                        }
                     })
                     choiceBox.appendChild(choiceImg)
                 }
                 promotingSquare.appendChild(choiceBox)
-            }
-
+            }            
             promote (classOfPromotedPiece,type,board){
                 console.log(this, 'Before creating a new obj')
+
                 let promoted = new classOfPromotedPiece(type,this.color)
                 let piece = this;
                 // couldnt get rid of prototype :/ so had to put the new func as property
                 piece.getPossibleMoves=promoted.getPossibleMoves
-                piece.checkIfCanPromote=false;
+                piece.promoted=true;
                 //copying properties, an object can't be replaced by reference.
                 Object.assign(piece,promoted)
                 console.log(this, 'After creating a new obj')
-                otherCanPlay(board)
-            }
-            promotingMove () {
-                if (this.checkIfEmpty(newX,newY,board)) {
-                    
-                }
+
             }
         }
-        function playAndCheckIfPawnPromotingAndCheckAttackingAndCheckPlacingPiece (e,board){
+        function play (e,board){
+            //cleaning previous listeners
+            board.parent.cleanDOM();
+            board.parent.render();
             console.log(e.target.dataset.coords) // gets destiny
             console.log(this)
             //the this of play is the instance of player, changed by using call().
@@ -513,16 +539,21 @@ function gameController (){
             // add promotion condition
             //changes the old place pointer
             board[oldX][oldY]=undefined 
-            if (this.displaying.checkIfEmpty(newX,newY,board)){
-                this.placePiece(this.displaying,newX,newY,board)
+
+
+            //checks if It's a pawn and if promoting
+            if (this.displaying.type==='pawn' && !this.displaying.promoted && (newY===0 || newY===7)) {
+                console.log('I AM PROMOTING', this)
+                this.displaying.promotingOrAttacking(newX,newY,board,this)
+            } else if (this.displaying.checkIfEmpty(newX,newY,board)){
+                placePiece(this.displaying,newX,newY,board)
                 otherCanPlay(board)
             } else{ 
                 //normal attack
-                //this.normalAttack(newX,newY,board)
+
                 this.attackChoice(newX,newY,board)
+                console.log('the this i want ', this)
                 }
-                //this.attackChoice(newX,newY,board)
-                //this.displaying.promoteBox(board)
         }
         function otherCanPlay(board){
             board.parent.cleanDOM()
@@ -546,8 +577,9 @@ function gameController (){
 
             }
         }
-        function play(fn, newX,newY,board){
-
+        function placePiece(piece,x,y,board) {
+            piece.coords=[x,y]
+            board[x][y]=piece
         }
 
 
